@@ -1,0 +1,18 @@
+-lib format
+-cp src/main
+-cp lib/hxparse/src
+-cp lib/haxeparser/src
+-D xray
+
+--each
+
+-main xray.Browser
+-js www/index.js
+-cmd cp res/html/index.html www/index.html
+-cmd cp res/html/index.css www/index.css
+
+--next
+
+-main xray.Generator
+-neko bin/generator.n
+-cmd neko bin/generator.n

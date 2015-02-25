@@ -1,0 +1,109 @@
+body {
+	font-family: "Source Code Pro", "Consolas";
+	font-size: 11px;
+	color: silver;
+	background-color: #111;
+	margin: 0px;
+}
+
+.query {
+	color: white;
+}
+
+.search {
+	list-style: none;
+	margin: 0px;
+	padding: 4px;
+	top: 30px;
+	bottom: 0px;
+	width: 240px;
+	position: absolute;
+	overflow-y: scroll;
+	overflow-x: hidden;
+}
+
+.search li {
+	cursor: hand;
+}
+
+.search li:hover {
+	text-decoration: underline;
+}
+
+.header {
+	height: 30px;
+	left: 0px;
+	right: 0px;
+	background-color: black;
+}
+
+.header select {
+	margin: 6px 4px;
+}
+
+.source {
+	padding: 4px;
+	top: 30px;
+	bottom: 0px;
+	left: 250px;
+	right: 0px;
+	position: absolute;
+	overflow-y: scroll;
+	tab-size: 4;
+	color: #F8F8F2;
+	margin: 0;
+}
+
+.code {
+	margin: 0;
+}
+
+.lines {
+	color: #333;
+	margin: 0;
+	float:left;
+	padding-right: 10px;
+	user-select: none;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+}
+
+.type {
+	cursor: hand;
+	color: #A4E402;
+}
+.type:hover {
+	text-decoration: underline;
+}
+
+.keyword {
+	color: #FC1F70;
+}
+.directive {
+	color: #60D9F1;
+}
+
+.comment {
+	color: #75715D;
+}
+
+.constant {
+	color: #BF80FF;
+}
+
+.string {
+	color: #E6DC6D;
+}
+
+.macro {
+	color: #F8AB00;
+}
+
+.skipped {
+	color: #75715D !important;
+}
+
+.range {
+	color: #999;
+}
