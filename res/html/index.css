@@ -22,10 +22,6 @@ body {
 	overflow-x: hidden;
 }
 
-.search li {
-	cursor: hand;
-}
-
 .search li:hover {
 	text-decoration: underline;
 }
@@ -70,7 +66,7 @@ body {
 }
 
 .type {
-	cursor: hand;
+	cursor: pointer;
 	color: #A4E402;
 }
 .type:hover {

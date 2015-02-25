@@ -12,22 +12,32 @@ class Processor
 	var index:Int;
 	var types:Array<TypeInfo>;
 	var tokens:Array<Token>;
-	var scope:GenericStack<Map<String, Position>>;
+	var scopes:GenericStack<Map<String, Position>>;
 
 	public function new(types:Array<TypeInfo>)
 	{
 		this.types = types;
-		this.scope = new GenericStack();
 	}
 
-	public function process(tokens:Array<Token>, module:Module)
+	public function getPosition(name:String)
 	{
+		var current = scopes.first();
+		for (scope in scopes)
+			if (scope.exists(name))
+				return scope.get(name);
+		return null;
+	}
+
+	public function process(tokens:Array<Token>, module:Module, moduleName:String)
+	{
+		this.scopes = new GenericStack();
 		pushScope('module');
 
 		this.index = 0;
 		this.tokens = tokens;
 
 		importModule('StdTypes');
+		importModule(moduleName);
 
 		for (type in module.decls)
 		{
@@ -41,19 +51,19 @@ class Processor
 				case ETypedef(d): processTypedef(d);
 			}
 		}
-
-		popScope('module');
 	}
 
 	function importModule(name:String)
 	{
+		trace('import $name');
 		var file = name.split('.').join('/') + '.hx';
 		for (type in types)
 		{
 			if (type.pos.file == file)
 			{
-				trace('set: ${type.name}');
-				scope.first().set(type.name, type.pos);
+				var name = type.name.split('.').pop();
+				trace('set: $name');
+				scopes.first().set(name, type.pos);
 			}
 		}
 	}
@@ -170,19 +180,19 @@ class Processor
 	function pushScope(id:String)
 	{
 		trace('push $id');
-		scope.add(new Map<String, Position>());
+		scopes.add(new Map<String, Position>());
 	}
 
 	function popScope(id:String)
 	{
 		trace('pop $id');
-		scope.pop();
+		scopes.pop();
 	}
 
 	function setScope(name:String, pos:Position)
 	{
 		trace('set: $name');
 		var token = findIdent(name, pos);
-		scope.first().set(name, token.pos);
+		scopes.first().set(name, token.pos);
 	}
 }

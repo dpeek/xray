@@ -23,8 +23,7 @@ class Generator
 		types = [];
 		var input = load(url);
 		process(input);
-		// var map = haxe.Serializer.run(types);
-		// sys.io.File.saveContent('map.txt', map);
+		types.sort(function (a, b) return Reflect.compare(a.name, b.name));
 		var map = haxe.Json.stringify(types);
 		sys.io.File.saveContent('www/map.json', map);
 	}

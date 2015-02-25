@@ -30,15 +30,52 @@ class Browser
 
 	var path:String;
 	var source:String;
+	var processor:Processor;
 
 	function new()
 	{
-		var body = js.Browser.document.body;
+		var http = new haxe.Http('map.json');
+		http.onData = onMapData;
+		http.request();
+	}
 
-		js.Browser.document.onkeypress = function (e:KeyboardEvent) {
-			if (e.charCode == 8) query = '';
-			filter(String.fromCharCode(e.which));
+	function updateLocation()
+	{
+		var window = js.Browser.window;
+		var hash = window.location.hash;
+		var position = hash.substr(2);
+		var file = position.split(':')[0];
+
+		if (position.indexOf(':') > -1)
+		{
+			var range = position.split(':')[1].split('-').map(Std.parseInt);
+			rangeMin = range[0];
+			rangeMax = range[1];
 		}
+		else
+		{
+			rangeMin = rangeMax = 0;
+		}
+
+		var http = new haxe.Http('src/$file');
+		trace('loading: $file');
+		http.onData = function (source) onLoad(file, source);
+		http.request();
+	}
+
+	function updatePlatform()
+	{
+		platform = platformSelect.value;
+		parse();
+		updateSearch();
+	}
+
+	function onMapData(data:String)
+	{
+		types = haxe.Json.parse(data);
+		processor = new Processor(types);
+
+		var body = js.Browser.document.body;
 
 		var headerElement = js.Browser.document.createDivElement();
 		body.appendChild(headerElement);
@@ -55,8 +92,6 @@ class Browser
 			option.innerText = platform;
 			platformSelect.appendChild(option);
 		}
-
-		platformSelect.onchange = function (_) updatePlatform();
 
 		sourceElement = js.Browser.document.createDivElement();
 		body.appendChild(sourceElement);
@@ -90,64 +125,27 @@ class Browser
 			load(element.innerText);
 		}
 
-		var http = new haxe.Http('map.json');
-		http.onData = onMapData;
-		http.request();
+		js.Browser.document.onkeypress = function (e:KeyboardEvent) {
+			if (e.charCode == 8) query = '';
+			filter(String.fromCharCode(e.which));
+		}
 
 		js.Browser.window.onhashchange = function (_) updateLocation();
-		updateLocation();
+		platformSelect.onchange = function (_) updatePlatform();
 
 		updatePlatform();
-	}
-
-	function updateLocation()
-	{
-		var window = js.Browser.window;
-		var hash = window.location.hash;
-		var position = hash.substr(2);
-		var file = position.split(':')[0];
-		var path = 'cache/haxe-3.1.3/std/$file';
-
-		if (position.indexOf(':') > -1)
-		{
-			var range = position.split(':')[1].split('-').map(Std.parseInt);
-			rangeMin = range[0];
-			rangeMax = range[1];
-		}
-		else
-		{
-			rangeMin = rangeMax = 0;
-		}
-
-		var http = new haxe.Http(path);
-		trace('loading: $path');
-		http.onData = function (source) onLoad(path, source);
-		http.request();
-	}
-
-	function updatePlatform()
-	{
-		platform = platformSelect.value;
-		parse();
-		search();
-	}
-
-	function onMapData(data:String)
-	{
-		types = haxe.Json.parse(data);
-		search();
+		updateLocation();
 	}
 
 	function load(name:String)
 	{
-		for (type in types)
-		{
-			if (type.name == name)
-			{
-				var pos = type.pos;
-				js.Browser.window.location.hash = '/' + pos.file + ':' + pos.min + '-' + pos.max;
-			}
-		}
+		var pos = processor.getPosition(name);
+		if (pos == null)
+			for (type in types)
+				if (type.name == name)
+					pos = type.pos;
+		if (pos != null)
+			js.Browser.window.location.hash = '/' + pos.file + ':' + pos.min + '-' + pos.max;
 	}
 
 	function onLoad(path, source)
@@ -172,8 +170,10 @@ class Browser
 		var module = parser.parse();
 		var tokens = parser.source.tokens;
 
-		var processor = new Processor(types);
-		processor.process(tokens, module);
+		var moduleName = path.split('/').join('.');
+		moduleName = moduleName.substr(0, moduleName.length - 3);
+
+		processor.process(tokens, module, moduleName);
 
 		var state = [];
 		var buf = new StringBuf();
@@ -281,13 +281,11 @@ class Browser
 		lastQuery = haxe.Timer.stamp();
 
 		query += char;
-		search();
+		updateSearch();
 	}
 
-	function search()
+	function updateSearch()
 	{
-		if (types == null) return;
-
 		var pat = ~/([^A-Z]*)([^.]*)(.*)/;
 		if (!pat.match(query)) return;
 
@@ -326,7 +324,7 @@ class Browser
 			return {score:score, type:type};
 		}).filter(function (result) {
 			return result.score > 0;
-		});
+		}).slice(0, 400);
 
 		types.sort(function (a, b) {
 			var diff = b.score - a.score;
