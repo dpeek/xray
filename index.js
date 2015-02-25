@@ -28506,7 +28506,7 @@ xray.Processor.prototype = {
 			if(f(token)) return token;
 			this.index += 1;
 		}
-		throw "token not found!";
+		return null;
 	}
 	,processExpr: function(expr) {
 		{
@@ -28612,8 +28612,10 @@ xray.Processor.prototype = {
 	,setScope: function(name,pos) {
 		console.log("set: " + name);
 		var token = this.findIdent(name,pos);
-		var this1 = this.scopes.first();
-		this1.set(name,token.pos);
+		if(token == null) console.log("could not find token for " + name); else {
+			var this1 = this.scopes.first();
+			this1.set(name,token.pos);
+		}
 	}
 	,__class__: xray.Processor
 };
