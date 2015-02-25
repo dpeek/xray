@@ -28266,7 +28266,7 @@ xray.Browser.prototype = {
 		if(this.rangeMax > this.rangeMin) {
 			var position = new hxparse.Position(this.path,this.rangeMin,this.rangeMax);
 			linepos = position.getLinePosition(input);
-			this.sourceElement.scrollTop = (linepos.lineMin - 5) * 14;
+			this.sourceElement.scrollTop = (linepos.lineMin - 5) * 13;
 		}
 		var lines_b = "";
 		var _g13 = 1;
