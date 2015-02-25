@@ -4037,6 +4037,7 @@ haxeparser.HaxeParser.prototype = $extend(hxparse.Parser_haxeparser_HaxeTokenSou
 					var name = _g.tok[2][2];
 					this.last = this.token.elt;
 					this.token = this.token.next;
+					this.source.classify("type");
 					acc = [{ pack : name, pos : p}];
 					break;
 				default:
@@ -4053,6 +4054,7 @@ haxeparser.HaxeParser.prototype = $extend(hxparse.Parser_haxeparser_HaxeTokenSou
 			case 10:
 				this.last = this.token.elt;
 				this.token = this.token.next;
+				this.source.classify("type");
 				{
 					var _g11 = this.peek(0);
 					switch(_g11.tok[1]) {
@@ -4063,6 +4065,7 @@ haxeparser.HaxeParser.prototype = $extend(hxparse.Parser_haxeparser_HaxeTokenSou
 							var k = _g11.tok[2][2];
 							this.last = this.token.elt;
 							this.token = this.token.next;
+							this.source.classify("type");
 							acc.push({ pack : k, pos : p2});
 							break;
 						default:
@@ -4075,6 +4078,7 @@ haxeparser.HaxeParser.prototype = $extend(hxparse.Parser_haxeparser_HaxeTokenSou
 							var p3 = _g11.pos;
 							this.last = this.token.elt;
 							this.token = this.token.next;
+							this.source.classify("type");
 							acc.push({ pack : "macro", pos : p3});
 							break;
 						default:
@@ -4093,6 +4097,7 @@ haxeparser.HaxeParser.prototype = $extend(hxparse.Parser_haxeparser_HaxeTokenSou
 									var p21 = _g2.pos;
 									this.last = this.token.elt;
 									this.token = this.token.next;
+									this.source.classify("type",this.source.last(1));
 									return { decl : haxeparser.TypeDef.EImport(acc,haxeparser.ImportMode.IAll), pos : p21};
 								default:
 									throw new hxparse.Unexpected(this.peek(0),this.stream.curPos());
@@ -4134,6 +4139,8 @@ haxeparser.HaxeParser.prototype = $extend(hxparse.Parser_haxeparser_HaxeTokenSou
 										var p23 = _g21.pos;
 										this.last = this.token.elt;
 										this.token = this.token.next;
+										this.source.classify("directive",this.source.last(2));
+										this.source.classify("type",this.source.last(1));
 										return { decl : haxeparser.TypeDef.EImport(acc,haxeparser.ImportMode.IAsName(name1)), pos : p23};
 									default:
 										throw new hxparse.Unexpected(this.peek(0),this.stream.curPos());
@@ -4176,6 +4183,8 @@ haxeparser.HaxeParser.prototype = $extend(hxparse.Parser_haxeparser_HaxeTokenSou
 											var p24 = _g22.pos;
 											this.last = this.token.elt;
 											this.token = this.token.next;
+											this.source.classify("directive",this.source.last(2));
+											this.source.classify("type",this.source.last(1));
 											return { decl : haxeparser.TypeDef.EImport(acc,haxeparser.ImportMode.IAsName(name2)), pos : p24};
 										default:
 											throw new hxparse.Unexpected(this.peek(0),this.stream.curPos());
