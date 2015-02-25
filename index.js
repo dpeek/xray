@@ -4321,8 +4321,8 @@ haxeparser.HaxeParser.prototype = $extend(hxparse.Parser_haxeparser_HaxeTokenSou
 			var _g = this.peek(0);
 			switch(_g.tok[1]) {
 			case 18:
-				var p = _g.pos;
-				if(p.min == pname.max) {
+				var p1 = _g.pos;
+				if(p1.min == pname.max) {
 					this.last = this.token.elt;
 					this.token = this.token.next;
 					var params = this.psep(haxeparser.TokenDef.Comma,$bind(this,this.expr));
@@ -4330,8 +4330,11 @@ haxeparser.HaxeParser.prototype = $extend(hxparse.Parser_haxeparser_HaxeTokenSou
 						var _g1 = this.peek(0);
 						switch(_g1.tok[1]) {
 						case 19:
+							var p2 = _g1.pos;
 							this.last = this.token.elt;
 							this.token = this.token.next;
+							this.source.classifyRange(p1,p1,"meta");
+							this.source.classifyRange(p2,p2,"meta");
 							return params;
 						default:
 							throw new hxparse.Unexpected(this.peek(0),this.stream.curPos());
@@ -4349,10 +4352,12 @@ haxeparser.HaxeParser.prototype = $extend(hxparse.Parser_haxeparser_HaxeTokenSou
 			var _g = this.peek(0);
 			switch(_g.tok[1]) {
 			case 21:
+				var p = _g.pos;
 				this.last = this.token.elt;
 				this.token = this.token.next;
 				var name = this.metaName();
 				var params = this.parseMetaParams(name.pos);
+				this.source.classifyRange(p,p,"meta");
 				return { name : name.name, params : params, pos : name.pos};
 			default:
 				throw new hxparse.NoMatch(this.stream.curPos(),this.peek(0));
@@ -4380,6 +4385,7 @@ haxeparser.HaxeParser.prototype = $extend(hxparse.Parser_haxeparser_HaxeTokenSou
 					var i = _g.tok[2][2];
 					this.last = this.token.elt;
 					this.token = this.token.next;
+					this.source.classify("meta");
 					return { name : i, pos : p};
 				default:
 					throw new hxparse.NoMatch(this.stream.curPos(),this.peek(0));
@@ -4390,10 +4396,12 @@ haxeparser.HaxeParser.prototype = $extend(hxparse.Parser_haxeparser_HaxeTokenSou
 				var k = _g.tok[2];
 				this.last = this.token.elt;
 				this.token = this.token.next;
+				this.source.classify("meta");
 				return { name : k[0].toLowerCase(), pos : p1};
 			case 11:
 				this.last = this.token.elt;
 				this.token = this.token.next;
+				this.source.classify("meta");
 				{
 					var _g1 = this.peek(0);
 					switch(_g1.tok[1]) {
@@ -4404,6 +4412,7 @@ haxeparser.HaxeParser.prototype = $extend(hxparse.Parser_haxeparser_HaxeTokenSou
 							var i1 = _g1.tok[2][2];
 							this.last = this.token.elt;
 							this.token = this.token.next;
+							this.source.classify("meta");
 							return { name : ":" + i1, pos : p2};
 						default:
 							throw new hxparse.NoMatch(this.stream.curPos(),this.peek(0));
@@ -4414,6 +4423,7 @@ haxeparser.HaxeParser.prototype = $extend(hxparse.Parser_haxeparser_HaxeTokenSou
 						var k1 = _g1.tok[2];
 						this.last = this.token.elt;
 						this.token = this.token.next;
+						this.source.classify("meta");
 						return { name : ":" + k1[0].toLowerCase(), pos : p3};
 					default:
 						throw new hxparse.NoMatch(this.stream.curPos(),this.peek(0));
@@ -24842,6 +24852,7 @@ haxeparser.HaxeParser.prototype = $extend(hxparse.Parser_haxeparser_HaxeTokenSou
 					var name = _g.tok[2][2];
 					this.last = this.token.elt;
 					this.token = this.token.next;
+					this.source.classify("ident");
 					return name;
 				default:
 					throw new hxparse.NoMatch(this.stream.curPos(),this.peek(0));
@@ -24852,6 +24863,7 @@ haxeparser.HaxeParser.prototype = $extend(hxparse.Parser_haxeparser_HaxeTokenSou
 				case 22:
 					this.last = this.token.elt;
 					this.token = this.token.next;
+					this.source.classify("ident");
 					return "new";
 				default:
 					throw new hxparse.NoMatch(this.stream.curPos(),this.peek(0));
@@ -28133,7 +28145,7 @@ xray.Browser.prototype = {
 	,load: function(name,inFile) {
 		if(inFile == null) inFile = false;
 		var pos = null;
-		if(inFile) this.processor.getPosition(name);
+		if(inFile) pos = this.processor.getPosition(name);
 		if(pos == null) {
 			var _g = 0;
 			var _g1 = this.types;
@@ -28342,6 +28354,12 @@ xray.Processor.prototype = {
 		this.tokens = tokens;
 		this.importModule("StdTypes");
 		this.importModule(moduleName);
+		if(moduleName.indexOf(".") > -1) this.importPackage((function($this) {
+			var $r;
+			var len = moduleName.lastIndexOf(".");
+			$r = HxOverrides.substr(moduleName,0,len);
+			return $r;
+		}(this)));
 		var _g = 0;
 		var _g1 = module.decls;
 		while(_g < _g1.length) {
@@ -28386,6 +28404,25 @@ xray.Processor.prototype = {
 			var type = _g1[_g];
 			++_g;
 			if(type.pos.file == file) {
+				var name1 = type.name.split(".").pop();
+				console.log("set: " + name1);
+				var this1 = this.scopes.first();
+				this1.set(name1,type.pos);
+			}
+		}
+	}
+	,importPackage: function(name) {
+		console.log("import " + name);
+		var _g = 0;
+		var _g1 = this.types;
+		while(_g < _g1.length) {
+			var type = _g1[_g];
+			++_g;
+			if(type.name.indexOf(".") == -1) continue;
+			var pack;
+			var len = type.name.lastIndexOf(".");
+			pack = HxOverrides.substr(type.name,0,len);
+			if(pack == name) {
 				var name1 = type.name.split(".").pop();
 				console.log("set: " + name1);
 				var this1 = this.scopes.first();
@@ -28599,6 +28636,16 @@ xray.RawTokenSource.prototype = $extend(hxparse.LexerTokenSource.prototype,{
 	,classify: function(name,token) {
 		if(token == null) token = this.last(0);
 		token.classes.push(name);
+	}
+	,classifyRange: function(p1,p2,name) {
+		var _g1 = 0;
+		var _g = this.tokens.length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			var token = this.last(i);
+			if(token.pos.min < p1.min) return;
+			if(token.pos.min >= p1.min && token.pos.max <= p2.max) token.classes.push(name);
+		}
 	}
 	,__class__: xray.RawTokenSource
 });
