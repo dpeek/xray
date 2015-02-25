@@ -28048,6 +28048,7 @@ xray.Browser.prototype = {
 		var hash = $window.location.hash;
 		var position = HxOverrides.substr(hash,2,null);
 		var file = position.split(":")[0];
+		if(file == "") return;
 		if(position.indexOf(":") > -1) {
 			var range = position.split(":")[1].split("-").map(Std.parseInt);
 			this.rangeMin = range[0];
