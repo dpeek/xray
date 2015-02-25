@@ -28105,7 +28105,7 @@ xray.Browser.prototype = {
 		this.codeElement.onmouseup = function(e) {
 			var element = e.target;
 			if(element.className != "type") return;
-			_g.load(element.innerText);
+			_g.load(element.innerText,true);
 		};
 		var _this6 = window.document;
 		this.listElement = _this6.createElement("ul");
@@ -28129,8 +28129,10 @@ xray.Browser.prototype = {
 		this.updatePlatform();
 		this.updateLocation();
 	}
-	,load: function(name) {
-		var pos = this.processor.getPosition(name);
+	,load: function(name,inFile) {
+		if(inFile == null) inFile = false;
+		var pos = null;
+		if(inFile) this.processor.getPosition(name);
 		if(pos == null) {
 			var _g = 0;
 			var _g1 = this.types;
