@@ -45,6 +45,7 @@ class Browser
 		var hash = window.location.hash;
 		var position = hash.substr(2);
 		var file = position.split(':')[0];
+		if (file == '') return;
 
 		if (position.indexOf(':') > -1)
 		{
@@ -111,7 +112,7 @@ class Browser
 		codeElement.onmouseup = function (e:MouseEvent) {
 			var element:SpanElement = cast e.target;
 			if (element.className != "type") return;
-			load(element.innerText);
+			load(element.innerText, true);
 		}
 
 		listElement = js.Browser.document.createUListElement();
@@ -137,9 +138,11 @@ class Browser
 		updateLocation();
 	}
 
-	function load(name:String)
+	function load(name:String, ?inFile:Bool=false)
 	{
-		var pos = processor.getPosition(name);
+		// trace('load $name $inFile');
+		var pos = null;
+		if (inFile) pos = processor.getPosition(name);
 		if (pos == null)
 			for (type in types)
 				if (type.name == name)
@@ -242,7 +245,7 @@ class Browser
 		{
 			var position = new hxparse.Position(path, rangeMin, rangeMax);
 			linepos = position.getLinePosition(input);
-			sourceElement.scrollTop = (linepos.lineMin - 5) * 14;
+			sourceElement.scrollTop = (linepos.lineMin - 5) * 13;
 		}
 		var lines = new StringBuf();
 		for (i in 1...numLines+1)

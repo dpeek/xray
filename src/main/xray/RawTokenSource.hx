@@ -1,6 +1,7 @@
 package xray;
 
 import haxeparser.Data;
+import haxe.macro.Expr;
 
 class RawTokenSource extends hxparse.LexerTokenSource<Token>
 {
@@ -28,5 +29,15 @@ class RawTokenSource extends hxparse.LexerTokenSource<Token>
 	{
 		if (token == null) token = last(0);
 		token.classes.push(name);
+	}
+
+	public function classifyRange(p1:Position, p2:Position, name:String)
+	{
+		for (i in 0...tokens.length)
+		{
+			var token = last(i);
+			if (token.pos.min < p1.min) return;
+			if (token.pos.min >= p1.min && token.pos.max <= p2.max) token.classes.push(name);
+		}
 	}
 }

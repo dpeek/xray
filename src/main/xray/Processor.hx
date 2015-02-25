@@ -38,6 +38,8 @@ class Processor
 
 		importModule('StdTypes');
 		importModule(moduleName);
+		if (moduleName.indexOf('.') > -1)
+			importPackage(moduleName.substr(0, moduleName.lastIndexOf('.')));
 
 		for (type in module.decls)
 		{
@@ -60,6 +62,22 @@ class Processor
 		for (type in types)
 		{
 			if (type.pos.file == file)
+			{
+				var name = type.name.split('.').pop();
+				trace('set: $name');
+				scopes.first().set(name, type.pos);
+			}
+		}
+	}
+
+	function importPackage(name:String)
+	{
+		trace('import $name');
+		for (type in types)
+		{
+			if (type.name.indexOf('.') == -1) continue;
+			var pack = type.name.substr(0, type.name.lastIndexOf('.'));
+			if (pack == name)
 			{
 				var name = type.name.split('.').pop();
 				trace('set: $name');
@@ -126,7 +144,8 @@ class Processor
 			if (f(token)) return token;
 			index += 1;
 		}
-		throw 'token not found!';
+		return null;
+		// throw 'token not found!';
 	}
 
 	function processExpr(expr:Expr)
@@ -193,6 +212,7 @@ class Processor
 	{
 		trace('set: $name');
 		var token = findIdent(name, pos);
-		scopes.first().set(name, token.pos);
+		if (token == null) trace('could not find token for $name')
+		else scopes.first().set(name, token.pos);
 	}
 }

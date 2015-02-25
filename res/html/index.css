@@ -76,6 +76,7 @@ body {
 .keyword {
 	color: #FC1F70;
 }
+
 .directive {
 	color: #60D9F1;
 }
@@ -102,4 +103,9 @@ body {
 
 .range {
 	color: #999;
+}
+
+.meta {
+	/*color: #DC322E;*/
+	color: #aaa;
 }
